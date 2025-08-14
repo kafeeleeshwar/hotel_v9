@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://luxstay_user:luxstay_password@db:5432/luxstay_db
+      - REDIS_URL=redis://redis:6379
+      - DEBUG=True
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+    networks:
+      - luxstay-network
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: luxstay_db
+      POSTGRES_USER: luxstay_user
+      POSTGRES_PASSWORD: luxstay_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - luxstay-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - luxstay-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  luxstay-network:
+    driver: bridge
